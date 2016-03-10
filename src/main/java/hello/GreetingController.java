@@ -31,65 +31,68 @@ public class GreetingController {
     private Bucket cbBucket;
 
     private static final String template = "Hello %s!";
+    private static final String keyRoot = "mufc";
+    private static final String element = "name";
+
     private final AtomicLong counter = new AtomicLong();
 
-    @RequestMapping("/greeting")
-    public Greeting greeting(@RequestParam(value="name", defaultValue="world") String name) {
+    @RequestMapping("/localString")
+    public Greeting localString(@RequestParam(value="name", defaultValue="world") String name) {
         return new Greeting(String.valueOf(counter.incrementAndGet()), String.format(template, name));
     }
 
-    @RequestMapping("/cbgreeting")
-    public Greeting cbgreeting() {
-        JsonDocument tomTest = cbBucket.get("mufc");
+    @RequestMapping("/fulldoc")
+    public Greeting localStringJson() {
+        JsonDocument tomTest = cbBucket.get(keyRoot);
 
         return new Greeting(
                 String.valueOf(counter.incrementAndGet()),
-               String.format(template, tomTest.content().get("name")));
+               String.format(template, tomTest.content().get(element)));
     }
 
-    @RequestMapping("/cbgreetingsubdoc")
-    public Greeting cbgreetingsubdoc() {
+    @RequestMapping("/subdoc")
+    public Greeting subdoc() {
         DocumentFragment<Lookup> tomTest = cbBucket
-                .lookupIn("mufc")
-                .get("name")
+                .lookupIn(keyRoot)
+                .get(element)
                 .doLookup();
 
         return new Greeting(
                 String.valueOf(counter.incrementAndGet()),
-               String.format(template, tomTest.content("name", String.class)));
+               String.format(template, tomTest.content(element, String.class)));
     }
 
-    @RequestMapping("/asyncgreeting")
-    public Observable<Greeting> asyncgreeting(@RequestParam(value="name", defaultValue="world") String name) {
+    @RequestMapping("/asyncFulldoc")
+    public Observable<Greeting> asyncFulldoc(@RequestParam(value="name", defaultValue="world") String name) {
         AsyncBucket asyncBucket = cbBucket.async();
 
-        Observable<Greeting> tomTest = asyncBucket.get("mufc")
+        Observable<Greeting> tomTest = asyncBucket.get(keyRoot)
             .flatMap( new Func1<JsonDocument, Observable<Greeting>>() {
                 @Override
                 public Observable<Greeting> call(JsonDocument gotDoc) {
                     return Observable.just(new Greeting(
                             String.valueOf(counter.incrementAndGet()),
-                            String.format(template, gotDoc.content().get("name"))));
+                            String.format(template, gotDoc.content().get(element))));
                 }
              });
 
         return tomTest;
     }
 
-    @RequestMapping("/asyncgreetingsubdoc")
-    public Observable<Greeting> asyncgreetingsubdoc(@RequestParam(value="name", defaultValue="world") String name) {
+    @RequestMapping("/asyncSubdoc")
+    public Observable<Greeting> asyncSubdoc(@RequestParam(value="name", defaultValue="world") String name) {
         AsyncBucket asyncBucket = cbBucket.async();
 
         Observable<Greeting> tomTest = asyncBucket
-            .lookupIn("mufc")
-            .get("name")
+            .lookupIn(keyRoot)
+            .get(element)
             .doLookup()
             .flatMap( new Func1<DocumentFragment<Lookup>, Observable<Greeting>>() {
                 @Override
                 public Observable<Greeting> call(DocumentFragment<Lookup> fragment) {
                     return Observable.just(new Greeting(
                             String.valueOf(counter.incrementAndGet()),
-                            String.format(template, fragment.content("name", String.class))));
+                            String.format(template, fragment.content(element, String.class))));
                 }
              });
 
