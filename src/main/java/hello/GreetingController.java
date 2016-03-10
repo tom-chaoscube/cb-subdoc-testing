@@ -76,5 +76,24 @@ public class GreetingController {
         return tomTest;
     }
 
+    @RequestMapping("/asyncgreetingsubdoc")
+    public Observable<Greeting> asyncgreetingsubdoc(@RequestParam(value="name", defaultValue="world") String name) {
+        AsyncBucket asyncBucket = cbBucket.async();
+
+        Observable<Greeting> tomTest = asyncBucket
+            .lookupIn("mufc")
+            .get("name")
+            .doLookup()
+            .flatMap( new Func1<DocumentFragment<Lookup>, Observable<Greeting>>() {
+                @Override
+                public Observable<Greeting> call(DocumentFragment<Lookup> fragment) {
+                    return Observable.just(new Greeting(
+                            String.valueOf(counter.incrementAndGet()),
+                            String.format(template, fragment.content("name", String.class))));
+                }
+             });
+
+        return tomTest;
+    }
 
 }
