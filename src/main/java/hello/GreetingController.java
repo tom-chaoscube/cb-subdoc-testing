@@ -31,18 +31,18 @@ public class GreetingController {
     private Bucket cbBucket;
 
     private static final String template = "Hello %s!";
-    private static final String keyRoot = "mufc";
-    private static final String element = "name";
+    //private static final String keyRoot = "mufc";
+    private static final String element = "searchTerm";
 
     private final AtomicLong counter = new AtomicLong();
 
     @RequestMapping("/localString")
-    public Greeting localString(@RequestParam(value="name", defaultValue="world") String name) {
-        return new Greeting(String.valueOf(counter.incrementAndGet()), String.format(template, name));
+    public Greeting localString(@RequestParam(value="keyRoot", defaultValue="world") String keyRoot) {
+        return new Greeting(String.valueOf(counter.incrementAndGet()), String.format(template, "tomgreen"));
     }
 
     @RequestMapping("/fulldoc")
-    public Greeting localStringJson() {
+    public Greeting localStringJson(@RequestParam(value="keyRoot", defaultValue="world") String keyRoot) {
         JsonDocument tomTest = cbBucket.get(keyRoot);
 
         return new Greeting(
@@ -51,7 +51,7 @@ public class GreetingController {
     }
 
     @RequestMapping("/subdoc")
-    public Greeting subdoc() {
+    public Greeting subdoc(@RequestParam(value="keyRoot", defaultValue="world") String keyRoot) {
         DocumentFragment<Lookup> tomTest = cbBucket
                 .lookupIn(keyRoot)
                 .get(element)
@@ -63,7 +63,7 @@ public class GreetingController {
     }
 
     @RequestMapping("/asyncFulldoc")
-    public Observable<Greeting> asyncFulldoc(@RequestParam(value="name", defaultValue="world") String name) {
+    public Observable<Greeting> asyncFulldoc(@RequestParam(value="keyRoot", defaultValue="world") String keyRoot) {
         AsyncBucket asyncBucket = cbBucket.async();
 
         Observable<Greeting> tomTest = asyncBucket.get(keyRoot)
@@ -80,7 +80,7 @@ public class GreetingController {
     }
 
     @RequestMapping("/asyncSubdoc")
-    public Observable<Greeting> asyncSubdoc(@RequestParam(value="name", defaultValue="world") String name) {
+    public Observable<Greeting> asyncSubdoc(@RequestParam(value="keyRoot", defaultValue="world") String keyRoot) {
         AsyncBucket asyncBucket = cbBucket.async();
 
         Observable<Greeting> tomTest = asyncBucket
