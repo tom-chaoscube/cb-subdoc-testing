@@ -20,8 +20,9 @@ dfTrim <- dfa[-c(96,97,98,99,100),]
 
 #melt data
 dfm <- melt(dfr, id.vars="pct")
+dfmTrim <- melt(dfrTrim, id.vars="pct")
 
 #ggplot
 ggplot(dfm, aes(pct,value, col=variable)) + geom_point()
 ggplot(dfm, aes(pct,value, col=variable)) + geom_point()
-ggplot(dfm, aes(pct,value, col=variable)) + geom_line(size=0.3) + geom_point(size=0.5)
+ggplot(dfm, aes(pct,value, col=variable)) + geom_line(size=0.3) + geom_point(size=0.5) + ylab("Time in ms") + xlab("Percent of Total Requests completed within time")
